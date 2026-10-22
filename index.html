@@ -1,0 +1,85 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Chat Socket.IO UNA</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 16px/1.4 Helvetica, Arial, sans-serif; background: #f4f6f8; color: #1c1c1c; }
+      header { position: fixed; top: 0; left: 0; right: 0; height: 56px; background: #0b3a4a; color: #fff; display: flex; align-items: center; padding: 0 16px; z-index: 2; }
+      header h1 { font-size: 18px; font-weight: 600; }
+      #messages { list-style-type: none; margin: 0; padding: 72px 16px 140px; }
+      #messages li { padding: 10px 12px; margin-bottom: 8px; background: #fff; border-radius: 8px; }
+      #messages li:nth-child(odd) { background: #e7eef2; }
+      #messages img, #messages video, #messages iframe { max-width: 100% !important; height: auto; }
+      #messages iframe { width: 100% !important; aspect-ratio: 16 / 9; }
+      form { background: #fff; border-top: 1px solid #d5dde3; padding: 12px 16px; position: fixed; bottom: 0; width: 100%; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; z-index: 2; }
+      form input, form button { font: inherit; border-radius: 6px; padding: 10px 12px; }
+      form input { border: 1px solid #b7c3cc; }
+      form input:focus { outline: 2px solid #1a7fa3; border-color: transparent; }
+      form button { background: rgb(130, 224, 255); border: none; cursor: pointer; }
+      #nombre { width: 180px; }
+      #m { flex: 1; min-width: 180px; }
+      #aviso { flex-basis: 100%; margin: 0; color: #4a5963; font-size: 13px; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Chat UNA</h1>
+    </header>
+    <ul id="messages"></ul>
+    <form action="">
+      <input id="nombre" autocomplete="off" placeholder="Username" aria-label="Nombre"/>
+      <input id="m" autocomplete="off" placeholder="Escriba un mensaje o pegue una URL" aria-label="Mensaje"/>
+      <button type="submit">Send</button>
+      <p id="aviso">Si el mensaje es solo una URL de imagen o de video, se muestra en el chat.</p>
+    </form>
+    <script src="https://cdn.socket.io/4.8.4/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+
+    var colorHexTxt = "";
+
+    function getRandomColor() {
+        var letters = '0123456789ABCDEF';
+        var color = '#';
+        for (var i = 0; i < 6; i++) {
+          color += letters[Math.floor(Math.random() * 16)];
+        }
+
+        return color;
+     }
+
+      $(function () {
+        var socket = io();
+        $('#m').trigger('focus');
+
+        $('form').submit(function(){
+            var nombreRaw = $('#nombre').val();
+            var nombreTxt = nombreRaw.trim() === '' ? 'Anónimo' : nombreRaw;
+            var mensajeTxt = $('#m').val();
+
+            if (mensajeTxt.trim() === '') {
+                return false;
+            }
+
+            if (colorHexTxt == "") {
+                colorHexTxt = getRandomColor();
+            }
+
+            var jsonMsg = { nombre: nombreTxt, mensaje: mensajeTxt, color: colorHexTxt };
+            socket.emit('Evento-Mensaje-Server', JSON.stringify(jsonMsg));
+            $('#m').val('');
+            return false;
+        });
+
+        socket.on('Evento-Mensaje-Server', function(msg){
+            var msgJson = JSON.parse(msg);
+            var mensajeDisplay = "<b style='color:"+ msgJson.color +"'>" + msgJson.nombre + "</b>: " + msgJson.mensaje;
+            $('#messages').append($('<li>').html(mensajeDisplay));
+            window.scrollTo(0, document.body.scrollHeight);
+        });
+
+      });
+    </script>
+  </body>
+</html>
