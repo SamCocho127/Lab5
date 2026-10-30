@@ -3,9 +3,7 @@
 ## Purpose
 
 Hace más claro el uso del chat: el encabezado, la lista y el formulario se leen con comodidad, un mensaje vacío no se publica, y los medios ya aceptados caben en el ancho de la conversación.
-
 ## Requirements
-
 ### Requirement: Encabezado y lista por encima del formulario
 El chat SHALL mostrar un encabezado con el nombre del chat. La lista de mensajes SHALL permanecer por encima del formulario, de modo que el formulario no tape el último mensaje.
 
@@ -36,12 +34,12 @@ El chat SHALL NOT publicar un mensaje cuyo texto está vacío o contiene solo es
 - **THEN** no aparece un mensaje nuevo y los espacios siguen en el campo
 
 ### Requirement: Nombre ausente
-El chat SHALL publicar el mensaje con el nombre Anónimo cuando el campo de nombre está vacío.
+El chat SHALL obtener el nombre desde la sesión autenticada, SHALL mostrarlo en `#nombre` como valor de solo lectura y SHALL NOT utilizar un nombre ausente, editable o enviado por el cliente como identidad autoritativa. El mensaje visible SHALL conservar la forma `Nombre: mensaje`.
 
 #### Scenario: Envío sin nombre
-- **GIVEN** el campo de nombre está vacío y el mensaje es `hola`
-- **WHEN** el usuario envía el formulario
-- **THEN** el mensaje publicado muestra Anónimo y el texto `hola`
+- **GIVEN** el usuario está autenticado y su perfil contiene un nombre
+- **WHEN** abre el chat y publica `hola`
+- **THEN** `#nombre` muestra el nombre autenticado como solo lectura y el mensaje publicado muestra ese nombre seguido de `: hola`
 
 ### Requirement: Un mensaje con texto se sigue publicando
 El chat SHALL publicar un mensaje cuyo texto no está vacío y SHALL vaciar el campo de mensaje después de enviarlo. El texto publicado SHALL conservar el nombre y el mensaje.

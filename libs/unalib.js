@@ -18,7 +18,7 @@ function isHttpMediaUrl(url, extensions) {
   return mediaUrlPattern(extensions).test(url.trim());
 }
 
-function escapeAttr(value) {
+function escapeHtml(value) {
   return String(value)
     .replace(/&/g, '&amp;')
     .replace(/"/g, '&quot;')
@@ -27,7 +27,17 @@ function escapeAttr(value) {
     .replace(/>/g, '&gt;');
 }
 
+function escapeAttr(value) {
+  return escapeHtml(value);
+}
+
+function safeColor(value) {
+  return typeof value === 'string' && /^#[0-9a-f]{6}$/i.test(value) ? value : '#0b3a4a';
+}
+
 module.exports = {
+
+    escapeHtml: escapeHtml,
 
 
     // logica que valida si un telefono esta correcto...
@@ -128,7 +138,7 @@ module.exports = {
       }
     },
   
-    validateMessage: function(msg){
+    validateMessage: function(msg, trustedIdentity){
       // Handle invalid input
       if (!msg || typeof msg !== 'string') {
         return JSON.stringify({ mensaje: '' });
@@ -136,6 +146,16 @@ module.exports = {
 
       try {
         var obj = JSON.parse(msg);
+
+      if (!obj || typeof obj !== 'object' || Array.isArray(obj)) {
+        return JSON.stringify({ mensaje: '' });
+      }
+
+      obj.mensaje = typeof obj.mensaje === 'string' ? obj.mensaje : '';
+      obj.color = safeColor(obj.color);
+      if (trustedIdentity && typeof trustedIdentity.name === 'string') {
+        obj.nombre = escapeHtml(trustedIdentity.name);
+      }
 
       if (this.is_script_injection(obj.mensaje)) {
         console.log("Inyeccion de script bloqueada");
@@ -155,12 +175,13 @@ module.exports = {
       }
       else{
         console.log("Es un texto!")
+        obj.mensaje = escapeHtml(obj.mensaje);
       }
       
       return JSON.stringify(obj);
       } catch (e) {
-        console.log('Error processing message:', e);
-        return JSON.stringify({ mensaje: msg }); // Return original message on error
+        console.log('Mensaje inválido bloqueado');
+        return JSON.stringify({ mensaje: '' });
       }
     }
   

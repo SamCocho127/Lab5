@@ -138,6 +138,29 @@ describe('unalib', function(){
 
   describe('funcion validateMessage', function(){
 
+    it('sustituye y escapa el nombre con la identidad confiable', function(){
+
+      var entrada = JSON.stringify({
+        nombre: 'nombre falso',
+        mensaje: 'hola',
+        color: '#000000'
+      });
+
+      var salida = JSON.parse(val.validateMessage(entrada, { name: '<Ana>' }));
+
+      assert.equal(salida.nombre, '&lt;Ana&gt;');
+      assert.equal(salida.mensaje, 'hola');
+
+    });
+
+    it('escapa HTML ordinario que no es un medio', function(){
+
+      var salida = publicar('<b>texto</b>');
+
+      assert.equal(salida.mensaje, '&lt;b&gt;texto&lt;/b&gt;');
+
+    });
+
     it('escenario URL jpg muestra una imagen', function(){
 
       var salida = publicar('http://image.com/image.jpg');

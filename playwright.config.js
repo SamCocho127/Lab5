@@ -17,7 +17,7 @@ module.exports = defineConfig({
     }
   },
   webServer: {
-    command: 'node server.js',
+    command: 'node test/fixtures/e2e-server.js',
     url: 'http://127.0.0.1:3010',
     env: {
       PORT: '3010'
